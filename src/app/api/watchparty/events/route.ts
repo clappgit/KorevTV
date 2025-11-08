@@ -9,17 +9,23 @@ type Client = {
   close: () => void;
 };
 
+type RoomState = {
+  clients: Set<Client>;
+  hostId?: string;
+  lastPlayback?: { state: 'play' | 'pause' | 'seek'; time: number };
+};
+
 declare global {
   // eslint-disable-next-line no-var
   var __WATCHPARTY_CHANNEL__: {
-    rooms: Map<string, Set<Client>>;
+    rooms: Map<string, RoomState>;
   } | undefined;
 }
 
 function getChannel() {
   if (!global.__WATCHPARTY_CHANNEL__) {
     global.__WATCHPARTY_CHANNEL__ = {
-      rooms: new Map<string, Set<Client>>()
+      rooms: new Map<string, RoomState>(),
     };
   }
   return global.__WATCHPARTY_CHANNEL__;
@@ -42,18 +48,23 @@ export async function GET(request: NextRequest) {
 
       const client: Client = { room, enqueue, close };
       const channel = getChannel();
-      if (!channel.rooms.has(room)) channel.rooms.set(room, new Set<Client>());
-      channel.rooms.get(room)!.add(client);
+      if (!channel.rooms.has(room)) channel.rooms.set(room, { clients: new Set<Client>() });
+      const state = channel.rooms.get(room)!;
+      state.clients.add(client);
 
       // 初始欢迎与心跳
       enqueue({ type: 'joined', room });
+      // 如果房间存在主机的最后播放状态，新加入时立即推送，便于一次性对齐进度
+      if (state.lastPlayback) {
+        enqueue({ type: 'playback', payload: state.lastPlayback, sender: state.hostId, ts: Date.now(), initial: true });
+      }
       const ping = setInterval(() => enqueue({ type: 'ping', t: Date.now() }), 30000);
 
       // 当连接关闭时，清理
       const signal = request.signal as AbortSignal;
       signal.addEventListener('abort', () => {
         clearInterval(ping);
-        channel.rooms.get(room)?.delete(client);
+        channel.rooms.get(room)?.clients.delete(client);
         close();
       });
     }

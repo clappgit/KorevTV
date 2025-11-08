@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import LiquidGlassContainer from './LiquidGlassContainer';
 import { getAuthInfoFromBrowserCookie } from '@/lib/auth';
+import LiquidGlassContainer from './LiquidGlassContainer';
 
 type ChatMsg = { id: string; sender?: string; text: string; ts: number };
 
@@ -10,7 +10,8 @@ export default function WatchPartyPanel() {
   const [room, setRoom] = useState('');
   const [name, setName] = useState('');
   const [connected, setConnected] = useState(false);
-  const [followHost, setFollowHost] = useState(true);
+  // 默认不持续跟随主机，仅在加入时对齐一次进度
+  const [followHost, setFollowHost] = useState(false);
   const [members, setMembers] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [chatText, setChatText] = useState('');
@@ -29,9 +30,11 @@ export default function WatchPartyPanel() {
       const n = sp.get('name');
       if (r) setRoom(r);
       if (n) setName(n);
-      // 从登录信息读取用户名作为默认昵称
+    } catch {}
+    // 从登录信息自动填充昵称
+    try {
       const auth = getAuthInfoFromBrowserCookie();
-      if (auth?.username) setName(auth.username);
+      if (auth?.username && !name) setName(auth.username);
     } catch {}
   }, []);
 
@@ -67,20 +70,28 @@ export default function WatchPartyPanel() {
       try {
         const data = JSON.parse(ev.data);
         if (!data) return;
-        if (data.type === 'playback' && followHost) {
+        if (data.type === 'playback') {
           if (data.sender === selfIdRef.current) return;
           const v = getVideo();
           if (!v) return;
-          suppressRef.current = true;
-          if (typeof data.payload?.time === 'number') {
-            v.currentTime = data.payload.time;
+          // 加入时一次性对齐主机进度；如果启用“跟随主机”则持续跟随
+          const applySync = () => {
+            suppressRef.current = true;
+            if (typeof data.payload?.time === 'number') {
+              v.currentTime = data.payload.time;
+            }
+            if (data.payload?.state === 'play') {
+              void v.play();
+            } else if (data.payload?.state === 'pause') {
+              v.pause();
+            }
+            setTimeout(() => (suppressRef.current = false), 300);
+          };
+          if (data.initial) {
+            applySync();
+          } else if (followHost) {
+            applySync();
           }
-          if (data.payload?.state === 'play') {
-            void v.play();
-          } else if (data.payload?.state === 'pause') {
-            v.pause();
-          }
-          setTimeout(() => (suppressRef.current = false), 300);
         } else if (data.type === 'presence') {
           const memberName = (data.payload?.name as string) || '未知用户';
           if (data.payload?.action === 'join') {
@@ -88,26 +99,6 @@ export default function WatchPartyPanel() {
           } else if (data.payload?.action === 'leave') {
             setMembers((prev) => prev.filter((m) => m !== memberName));
           }
-        } else if (data.type === 'sync-request') {
-          // 新成员请求同步，响应当前状态
-          const v = getVideo();
-          if (v) {
-            emit('sync', { time: v.currentTime, state: v.paused ? 'pause' : 'play' });
-          }
-        } else if (data.type === 'sync' && followHost) {
-          if (data.sender === selfIdRef.current) return;
-          const v = getVideo();
-          if (!v) return;
-          suppressRef.current = true;
-          if (typeof data.payload?.time === 'number') {
-            v.currentTime = data.payload.time;
-          }
-          if (data.payload?.state === 'play') {
-            void v.play();
-          } else if (data.payload?.state === 'pause') {
-            v.pause();
-          }
-          setTimeout(() => (suppressRef.current = false), 300);
         } else if (data.type === 'chat') {
           const msg: ChatMsg = {
             id: `${data.ts}-${Math.random().toString(36).slice(2, 6)}`,
@@ -124,9 +115,8 @@ export default function WatchPartyPanel() {
     };
     esRef.current = es;
     setConnected(true);
-    // 广播加入并请求同步
+    // 广播加入
     emit('presence', { action: 'join', name });
-    emit('sync-request', { requester: selfIdRef.current });
     ensureVideoListeners();
   };
 
@@ -157,16 +147,6 @@ export default function WatchPartyPanel() {
     v.addEventListener('play', onPlay);
     v.addEventListener('pause', onPause);
     v.addEventListener('seeked', onSeeked);
-    // 定期同步进度（每2秒，避免过于频繁）
-    let lastEmit = 0;
-    const onTimeUpdate = () => {
-      const now = Date.now();
-      if (now - lastEmit > 2000 && !suppressRef.current) {
-        lastEmit = now;
-        emit('playback', { state: v.paused ? 'pause' : 'play', time: v.currentTime });
-      }
-    };
-    v.addEventListener('timeupdate', onTimeUpdate);
   };
 
   const sendChat = () => {
@@ -208,7 +188,7 @@ export default function WatchPartyPanel() {
       <LiquidGlassContainer className='px-3 py-2 flex items-center gap-2' roundedClass='rounded-full' intensity='medium' shadow='lg' border='subtle'>
         <span className='text-xs font-semibold text-gray-700 dark:text-gray-200'>一起观看</span>
         <input value={room} onChange={(e) => setRoom(e.target.value.trim())} placeholder='房间号' className='text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60' />
-        <input value={name} readOnly placeholder='昵称（自动使用登录名称）' className='text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60' />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder='昵称' className='text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60' />
         <button onClick={createRoom} className='text-xs px-3 py-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-700'>生成房间号</button>
         <button onClick={copyInvite} className='text-xs px-3 py-1 rounded-full bg-gray-700 text-white hover:bg-gray-800'>复制邀请</button>
         {!connected ? (

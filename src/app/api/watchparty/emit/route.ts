@@ -9,17 +9,23 @@ type Client = {
   close: () => void;
 };
 
+type RoomState = {
+  clients: Set<Client>;
+  hostId?: string;
+  lastPlayback?: { state: 'play' | 'pause' | 'seek'; time: number };
+};
+
 declare global {
   // eslint-disable-next-line no-var
   var __WATCHPARTY_CHANNEL__: {
-    rooms: Map<string, Set<Client>>;
+    rooms: Map<string, RoomState>;
   } | undefined;
 }
 
 function getChannel() {
   if (!global.__WATCHPARTY_CHANNEL__) {
     global.__WATCHPARTY_CHANNEL__ = {
-      rooms: new Map<string, Set<Client>>()
+      rooms: new Map<string, RoomState>()
     };
   }
   return global.__WATCHPARTY_CHANNEL__;
@@ -36,7 +42,27 @@ export async function POST(req: NextRequest) {
       ts: Date.now()
     };
     const channel = getChannel();
-    const clients = channel.rooms.get(room);
+    if (!channel.rooms.has(room)) channel.rooms.set(room, { clients: new Set<Client>() });
+    const state = channel.rooms.get(room)!;
+
+    // 主机选择：第一次有人加入即视为主机，或由 presence.isHost 指定
+    if (event.type === 'presence' && event.payload?.action === 'join') {
+      const isHost = Boolean(event.payload?.isHost);
+      if (!state.hostId || isHost) {
+        state.hostId = event.sender;
+      }
+    }
+
+    // 仅记录主机的最后播放状态，供后续新加入者一次性对齐
+    if (event.type === 'playback' && state.hostId && event.sender === state.hostId) {
+      const p = event.payload || {};
+      const time = typeof p.time === 'number' ? p.time : 0;
+      const validStates = new Set(['play', 'pause', 'seek']);
+      const stateStr = validStates.has(p.state) ? p.state : 'seek';
+      state.lastPlayback = { state: stateStr as 'play' | 'pause' | 'seek', time };
+    }
+
+    const clients = state.clients;
     if (clients && clients.size > 0) {
       for (const c of clients) {
         try {
