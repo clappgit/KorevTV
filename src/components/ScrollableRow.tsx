@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import LiquidGlassContainer from '@/components/LiquidGlassContainer';
 import { Children, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import AnimatedCardGrid from '@/components/AnimatedCardGrid';
@@ -147,9 +148,17 @@ function ScrollableRow({
           >
             <button
               onClick={handleScrollLeftClick}
-              className='w-12 h-12 bg-white/95 rounded-full shadow-lg flex items-center justify-center hover:bg-white border border-gray-200 transition-transform hover:scale-105 dark:bg-gray-800/90 dark:hover:bg-gray-700 dark:border-gray-600'
+              className='w-12 h-12 rounded-full transition-transform hover:scale-105'
             >
-              <ChevronLeft className='w-6 h-6 text-gray-600 dark:text-gray-300' />
+              <LiquidGlassContainer
+                className='w-full h-full flex items-center justify-center'
+                roundedClass='rounded-full'
+                intensity='medium'
+                shadow='xl'
+                border='subtle'
+              >
+                <ChevronLeft className='w-6 h-6 text-gray-700 dark:text-gray-200' />
+              </LiquidGlassContainer>
             </button>
           </div>
         </div>
@@ -176,9 +185,17 @@ function ScrollableRow({
           >
             <button
               onClick={handleScrollRightClick}
-              className='w-12 h-12 bg-white/95 rounded-full shadow-lg flex items-center justify-center hover:bg-white border border-gray-200 transition-transform hover:scale-105 dark:bg-gray-800/90 dark:hover:bg-gray-700 dark:border-gray-600'
+              className='w-12 h-12 rounded-full transition-transform hover:scale-105'
             >
-              <ChevronRight className='w-6 h-6 text-gray-600 dark:text-gray-300' />
+              <LiquidGlassContainer
+                className='w-full h-full flex items-center justify-center'
+                roundedClass='rounded-full'
+                intensity='medium'
+                shadow='xl'
+                border='subtle'
+              >
+                <ChevronRight className='w-6 h-6 text-gray-700 dark:text-gray-200' />
+              </LiquidGlassContainer>
             </button>
           </div>
         </div>

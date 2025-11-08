@@ -28,6 +28,7 @@ import AIRecommendModal from '@/components/AIRecommendModal';
 import CapsuleSwitch from '@/components/CapsuleSwitch';
 import ContinueWatching from '@/components/ContinueWatching';
 import HeroBanner from '@/components/HeroBanner';
+import ForYouRow from '@/components/ForYouRow';
 import PageLayout from '@/components/PageLayout';
 import ScrollableRow from '@/components/ScrollableRow';
 import SectionTitle from '@/components/SectionTitle';
@@ -683,6 +684,9 @@ function HomeClient() {
               )}
 
               {/* 继续观看已移至中间页 */}
+
+              {/* 为你推荐（基于继续观看与收藏的个性化） */}
+              <ForYouRow />
 
               {/* 即将上映 */}
               {(() => {

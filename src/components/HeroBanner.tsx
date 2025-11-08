@@ -2,6 +2,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Info, Play } from 'lucide-react';
+import LiquidGlassContainer from '@/components/LiquidGlassContainer';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -250,14 +251,18 @@ export default function HeroBanner({
             className='hidden md:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/30 backdrop-blur-sm text-white items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/50 transition-all transform hover:scale-110'
             aria-label='上一张'
           >
-            <ChevronLeft className='w-5 h-5 sm:w-6 sm:h-6' />
+            <LiquidGlassContainer className='w-full h-full flex items-center justify-center' roundedClass='rounded-full' intensity='medium' shadow='xl' border='subtle'>
+              <ChevronLeft className='w-5 h-5 sm:w-6 sm:h-6' />
+            </LiquidGlassContainer>
           </button>
           <button
             onClick={handleNext}
             className='hidden md:flex absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/30 backdrop-blur-sm text-white items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/50 transition-all transform hover:scale-110'
             aria-label='下一张'
           >
-            <ChevronRight className='w-5 h-5 sm:w-6 sm:h-6' />
+            <LiquidGlassContainer className='w-full h-full flex items-center justify-center' roundedClass='rounded-full' intensity='medium' shadow='xl' border='subtle'>
+              <ChevronRight className='w-5 h-5 sm:w-6 sm:h-6' />
+            </LiquidGlassContainer>
           </button>
         </>
       )}
