@@ -17,6 +17,20 @@ export function GlobalErrorIndicator() {
     // 监听自定义错误事件
     const handleError = (event: CustomEvent) => {
       const { message } = event.detail;
+      // 背景同步与非关键错误抑制：避免打扰用户
+      const suppressPatterns = [
+        '后台同步',
+        '保存播放记录失败',
+        '获取播放记录失败',
+        '后台同步用户统计数据失败',
+        '后台同步收藏失败',
+        '后台同步搜索历史失败',
+        '后台同步跳过片头片尾配置失败',
+      ];
+      if (typeof message === 'string' && suppressPatterns.some((p) => message.includes(p))) {
+        return; // 静默处理这类错误
+      }
+
       const newError: ErrorInfo = {
         id: Date.now().toString(),
         message,
