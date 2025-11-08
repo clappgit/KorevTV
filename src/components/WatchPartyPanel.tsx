@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getAuthInfoFromBrowserCookie } from '@/lib/auth';
 import LiquidGlassContainer from './LiquidGlassContainer';
-import { Users, Copy as CopyIcon, Crown, Wifi } from 'lucide-react';
+import { Users, Copy as CopyIcon, Crown, Wifi, ChevronDown, ChevronUp } from 'lucide-react';
 
 type ChatMsg = { id: string; sender?: string; text: string; ts: number };
 
@@ -23,6 +23,7 @@ export default function WatchPartyPanel() {
   const suppressRef = useRef<boolean>(false);
   const createdRoomRef = useRef<boolean>(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     selfIdRef.current = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -47,6 +48,13 @@ export default function WatchPartyPanel() {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     } catch {}
   }, [messages]);
+
+  useEffect(() => {
+    // 桌面端默认展开聊天，移动端默认折叠
+    try {
+      setShowChat(window.innerWidth >= 768);
+    } catch {}
+  }, []);
 
   const getVideo = (): HTMLVideoElement | null => {
     if (videoRef.current && document.contains(videoRef.current)) return videoRef.current;
@@ -258,38 +266,54 @@ export default function WatchPartyPanel() {
             <span className='text-xs font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1'><Users className='w-3 h-3' />成员</span>
             <div className='flex items-center gap-1'>
               {members.length === 0 && <span className='text-xs text-gray-500 dark:text-gray-400'>暂无成员</span>}
-              {members.slice(0, 6).map((m, i) => (
-                <span key={`${m}-${i}`} className='text-[10px] px-2 py-[2px] rounded-full bg-white/60 dark:bg-gray-800/40 border border-white/30 dark:border-gray-700/40 text-gray-700 dark:text-gray-200'>
-                  {m.slice(0, 8)}
-                </span>
-              ))}
+              {members.slice(0, 6).map((m, i) => {
+                const initial = (m || '?').trim().charAt(0).toUpperCase();
+                return (
+                  <span key={`${m}-${i}`} className='flex items-center gap-1 px-2 py-[2px] rounded-full bg-white/60 dark:bg-gray-800/40 border border-white/30 dark:border-gray-700/40 text-gray-700 dark:text-gray-200'>
+                    <span className='w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 text-white text-[10px] flex items-center justify-center'>
+                      {initial || '?'}
+                    </span>
+                    <span className='text-[10px]'>{m.slice(0, 8)}</span>
+                  </span>
+                );
+              })}
               {members.length > 6 && (
                 <span className='text-[10px] px-2 py-[2px] rounded-full bg-white/60 dark:bg-gray-800/40 border border-white/30 dark:border-gray-700/40 text-gray-700 dark:text-gray-200'>+{members.length - 6}</span>
               )}
             </div>
           </div>
-          <span className='text-xs text-gray-600 dark:text-gray-400'>共 {members.length} 人</span>
+          <div className='flex items-center gap-2'>
+            <span className='text-xs text-gray-600 dark:text-gray-400'>共 {members.length} 人</span>
+            <button onClick={() => setShowChat((v) => !v)} aria-expanded={showChat} className='text-xs px-2 py-1 rounded-full bg-white/60 dark:bg-gray-800/40 border border-white/30 dark:border-gray-700/40 text-gray-700 dark:text-gray-200 flex items-center gap-1'>
+              {showChat ? <ChevronUp className='w-3 h-3' /> : <ChevronDown className='w-3 h-3' />}
+              {showChat ? '收起聊天' : '展开聊天'}
+            </button>
+          </div>
         </div>
 
-        <div className='text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2'>聊天</div>
-        <div className='h-32 overflow-y-auto rounded-md bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/40 p-2'>
-          {messages.length === 0 && <div className='text-xs text-gray-500 dark:text-gray-400'>暂无消息</div>}
-          {messages.map((msg) => {
-            const self = msg.sender === selfIdRef.current;
-            return (
-              <div key={msg.id} className={`flex ${self ? 'justify-end' : 'justify-start'} mb-1`}>
-                <div className={`max-w-[75%] px-2 py-1 rounded-2xl text-xs ${self ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100'}`}>
-                  {msg.text}
-                </div>
-              </div>
-            );
-          })}
-          <div ref={chatEndRef} />
-        </div>
-        <div className='mt-2 flex items-center gap-2'>
-          <input value={chatText} onChange={(e) => setChatText(e.target.value)} placeholder='输入消息' className='flex-1 text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60' />
-          <button onClick={sendChat} className='text-xs px-3 py-1 rounded-full bg-blue-600 text-white hover:bg-blue-700'>发送</button>
-        </div>
+        {showChat && (
+          <>
+            <div className='text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2'>聊天</div>
+            <div className='h-32 overflow-y-auto rounded-md bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/40 p-2'>
+              {messages.length === 0 && <div className='text-xs text-gray-500 dark:text-gray-400'>暂无消息</div>}
+              {messages.map((msg) => {
+                const self = msg.sender === selfIdRef.current;
+                return (
+                  <div key={msg.id} className={`flex ${self ? 'justify-end' : 'justify-start'} mb-1`}>
+                    <div className={`max-w-[75%] px-2 py-1 rounded-2xl text-xs ${self ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100'}`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={chatEndRef} />
+            </div>
+            <div className='mt-2 flex items-center gap-2'>
+              <input value={chatText} onChange={(e) => setChatText(e.target.value)} placeholder='输入消息' className='flex-1 text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60' />
+              <button onClick={sendChat} className='text-xs px-3 py-1 rounded-full bg-blue-600 text-white hover:bg-blue-700'>发送</button>
+            </div>
+          </>
+        )}
       </LiquidGlassContainer>
     </div>
   );
