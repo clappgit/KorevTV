@@ -27,7 +27,8 @@ import {
 import { getDoubanDetails } from '@/lib/douban.client';
 import { SearchResult } from '@/lib/types';
 import { getVideoResolutionFromM3u8, processImageUrl } from '@/lib/utils';
-import WatchPartyControl from '@/components/WatchPartyControl';
+import dynamic from 'next/dynamic';
+const WatchPartyPanel = dynamic(() => import('@/components/WatchPartyPanel'), { ssr: false });
 
 // 扩展 HTMLVideoElement 类型以支持 hls 属性
 declare global {
