@@ -4,7 +4,7 @@
 
 import { Brain, Calendar, ChevronRight, Film, Play,Sparkles, Tv } from 'lucide-react';
 import Link from 'next/link';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 
 import { getAuthInfoFromBrowserCookie } from '@/lib/auth';
 import {
@@ -159,11 +159,7 @@ function HomeClient() {
 
   const [favoriteItems, setFavoriteItems] = useState<FavoriteItem[]>([]);
 
-  useEffect(() => {
-    // 清理过期缓存
-    cleanExpiredCache().catch(console.error);
-
-    const fetchRecommendData = async () => {
+  const fetchRecommendData = useCallback(async () => {
       try {
         setLoading(true);
 
@@ -401,10 +397,27 @@ function HomeClient() {
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchRecommendData();
   }, []);
+
+  useEffect(() => {
+    // 清理过期缓存并首次加载
+    cleanExpiredCache().catch(console.error);
+    fetchRecommendData();
+  }, [fetchRecommendData]);
+
+  useEffect(() => {
+    // 每30分钟自动刷新一次（页面可见时）
+    const refreshMs = 30 * 60 * 1000;
+    const timer = setInterval(() => {
+      try {
+        if (typeof document === 'undefined' || document.visibilityState !== 'visible') return;
+        fetchRecommendData();
+      } catch (e) {
+        // 忽略定时刷新错误，避免影响页面
+      }
+    }, refreshMs);
+    return () => clearInterval(timer);
+  }, [fetchRecommendData]);
 
   // 处理收藏数据更新的函数
   const updateFavoriteItems = async (allFavorites: Record<string, any>) => {
@@ -627,6 +640,12 @@ function HomeClient() {
                         rate: movie.rate,
                         douban_id: Number(movie.id),
                         type: 'movie',
+                        region: Array.isArray(movie.countries) ? movie.countries[0] : undefined,
+                        tags: Array.isArray(movie.genres) ? movie.genres : undefined,
+                        creators: [
+                          ...(Array.isArray(movie.directors) ? movie.directors : []),
+                          ...(Array.isArray(movie.cast) ? movie.cast.slice(0, 4) : [])
+                        ],
                       })),
                       // 豆瓣电视剧
                       ...hotTvShows.slice(0, 2).map((show) => ({
@@ -638,6 +657,12 @@ function HomeClient() {
                         rate: show.rate,
                         douban_id: Number(show.id),
                         type: 'tv',
+                        region: Array.isArray(show.countries) ? show.countries[0] : undefined,
+                        tags: Array.isArray(show.genres) ? show.genres : undefined,
+                        creators: [
+                          ...(Array.isArray(show.directors) ? show.directors : []),
+                          ...(Array.isArray(show.cast) ? show.cast.slice(0, 4) : [])
+                        ],
                       })),
                       // 豆瓣综艺
                       ...hotVarietyShows.slice(0, 1).map((show) => ({
@@ -649,6 +674,12 @@ function HomeClient() {
                         rate: show.rate,
                         douban_id: Number(show.id),
                         type: 'variety',
+                        region: Array.isArray(show.countries) ? show.countries[0] : undefined,
+                        tags: Array.isArray(show.genres) ? show.genres : undefined,
+                        creators: [
+                          ...(Array.isArray(show.directors) ? show.directors : []),
+                          ...(Array.isArray(show.cast) ? show.cast.slice(0, 4) : [])
+                        ],
                       })),
                       // 短剧（非豆瓣）
                       ...hotShortDramas.slice(0, 2).map((drama) => ({
@@ -659,6 +690,9 @@ function HomeClient() {
                         year: '',
                         rate: drama.score ? drama.score.toString() : '',
                         type: 'shortdrama',
+                        region: undefined,
+                        tags: undefined,
+                        creators: undefined,
                       })),
                       // 番剧（非豆瓣，来自 bangumi）
                       ...(bangumiCalendarData.length > 0
@@ -678,6 +712,9 @@ function HomeClient() {
                               rate: anime.rating?.score?.toFixed(1) || '',
                               douban_id: anime.id,
                               type: 'anime',
+                              region: '日本',
+                              tags: undefined,
+                              creators: undefined,
                             }));
                           })()
                         : [])
@@ -685,6 +722,7 @@ function HomeClient() {
                     autoPlayInterval={5000}
                     showControls={true}
                     showIndicators={true}
+                    onRecommend={() => setShowAIRecommendModal(true)}
                   />
                 </section>
               )}
