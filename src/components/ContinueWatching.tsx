@@ -157,6 +157,28 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     return (record.play_time / record.total_time) * 100;
   };
 
+  // 从 key 中解析 source 和 id（提前声明，供后续函数使用）
+  const parseKey = (key: string) => {
+    const [source, id] = key.split('+');
+    return { source, id };
+  };
+
+  // 检查播放记录是否有新集数更新（提前声明，避免“初始化前无法访问”错误）
+  const getNewEpisodesCount = (record: PlayRecord & { key: string }): number => {
+    if (!watchingUpdates || !watchingUpdates.updatedSeries) return 0;
+
+    const { source, id } = parseKey(record.key);
+
+    // 在watchingUpdates中查找匹配的剧集
+    const matchedSeries = watchingUpdates.updatedSeries.find(series =>
+      series.sourceKey === source &&
+      series.videoId === id &&
+      series.hasNewEpisode
+    );
+
+    return matchedSeries ? (matchedSeries.newEpisodes || 0) : 0;
+  };
+
   // 过滤后的记录
   const filteredRecords = useMemo(() => {
     let arr = [...playRecords];
@@ -188,27 +210,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     });
   }, [filteredRecords, sortBy, favoriteKeys]);
 
-  // 从 key 中解析 source 和 id
-  const parseKey = (key: string) => {
-    const [source, id] = key.split('+');
-    return { source, id };
-  };
-
-  // 检查播放记录是否有新集数更新
-  const getNewEpisodesCount = (record: PlayRecord & { key: string }): number => {
-    if (!watchingUpdates || !watchingUpdates.updatedSeries) return 0;
-
-    const { source, id } = parseKey(record.key);
-
-    // 在watchingUpdates中查找匹配的剧集
-    const matchedSeries = watchingUpdates.updatedSeries.find(series =>
-      series.sourceKey === source &&
-      series.videoId === id &&
-      series.hasNewEpisode
-    );
-
-    return matchedSeries ? (matchedSeries.newEpisodes || 0) : 0;
-  };
+  // 注意：parseKey 与 getNewEpisodesCount 已提前声明，供后续使用
 
   // 获取最新的总集数（用于显示，不修改原始数据）
   const getLatestTotalEpisodes = (record: PlayRecord & { key: string }): number => {

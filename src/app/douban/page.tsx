@@ -930,7 +930,13 @@ function DoubanPageClient() {
                         douban_id={Number(item.id)}
                         rate={item.rate}
                         year={item.year}
-                        type={type === 'movie' ? 'movie' : ''} // 电影类型严格控制，tv 不控
+                        type={
+                          type === 'movie' ? 'movie'
+                          : type === 'tv' ? 'tv'
+                          : type === 'show' ? 'show'
+                          : type === 'anime' ? 'anime'
+                          : ''
+                        } // 为非电影类型传入正确类型以显示徽章
                         isBangumi={
                           type === 'anime' && primarySelection === '每日放送'
                         }

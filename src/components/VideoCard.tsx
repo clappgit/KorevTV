@@ -888,49 +888,46 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
             </div>
           )}
 
-          {/* 集数徽章 - 右下角显示 */}
+          {/* 底部左侧徽章容器：先显示“已完结”，下方显示“共多少集” */}
           {(() => {
-            const extractUpdatedEpisodeCount = (r?: string): number | null => {
-              if (!r) return null;
-              const patterns = [
-                /更新(?:至|到)?\s*第?\s*(\d+)\s*(?:集|话)/i,
-                /更至\s*(\d+)\s*(?:集|话)/i,
-                /第\s*(\d+)\s*(?:集|话)[^，。]*更新/i,
-              ];
-              for (const p of patterns) {
-                const m = r.match(p);
-                if (m && m[1]) {
-                  const n = parseInt(m[1], 10);
-                  if (!Number.isNaN(n)) return n;
-                }
-              }
-              return null;
-            };
-            const updatedCount = extractUpdatedEpisodeCount(remarks);
-            const shouldShow = !isUpcoming && ((actualEpisodes && actualEpisodes > 1) || updatedCount !== null);
-            if (!shouldShow) return null;
+            const isSeriesType = ['tv', 'anime', 'variety'].includes(normalizedType || '');
+            const showEpisodesTotal = !isUpcoming && isSeriesType && !!actualEpisodes && actualEpisodes > 1;
+            const showCompleted = !!remarks && isSeriesCompleted(remarks);
+            if (!showEpisodesTotal && !showCompleted) return null;
+
             return (
-            <div
-              className='absolute bottom-2 right-2 bg-gradient-to-br from-emerald-500/95 via-teal-500/95 to-cyan-600/95 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg ring-2 ring-white/30 transition-all duration-300 ease-out group-hover:scale-105 group-hover:shadow-emerald-500/60 group-hover:ring-emerald-300/50 z-30'
-              style={{
-                WebkitUserSelect: 'none',
-                userSelect: 'none',
-                WebkitTouchCallout: 'none',
-              } as React.CSSProperties}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                return false;
-              }}
-            >
-              <span className='flex items-center gap-1'>
-                <span className='text-[10px]'>📀</span>
-                {isSeriesCompleted(remarks)
-                  ? `已完结 · 共${(actualEpisodes && actualEpisodes > 0) ? actualEpisodes : (updatedCount ?? '')}集`
-                  : updatedCount !== null
-                    ? `更新至 · 第${updatedCount}集`
-                    : `更新至 · ${actualEpisodes}集`}
-              </span>
-            </div>
+              <div
+                className='absolute bottom-2 left-2 flex flex-col items-start gap-1 z-30'
+                style={{
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                } as React.CSSProperties}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  return false;
+                }}
+              >
+                {/* 已完结徽章 - 放在上方 */}
+                {showCompleted && (
+                  <div className='bg-gradient-to-br from-blue-500/95 via-indigo-500/95 to-purple-600/95 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg ring-2 ring-white/30 transition-all duration-300 ease-out group-hover:scale-105 group-hover:shadow-blue-500/60 group-hover:ring-blue-300/50'>
+                    <span className='flex items-center gap-1'>
+                      <span className='text-[10px]'>✓</span>
+                      已完结
+                    </span>
+                  </div>
+                )}
+
+                {/* 共多少集徽章 - 放在下方 */}
+                {showEpisodesTotal && (
+                  <div className='bg-gradient-to-br from-emerald-500/95 via-teal-500/95 to-cyan-600/95 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg ring-2 ring-white/30 transition-all duration-300 ease-out group-hover:scale-105 group-hover:shadow-emerald-500/60 group-hover:ring-emerald-300/50'>
+                    <span className='flex items-center gap-1'>
+                      <span className='text-[10px]'>📀</span>
+                      {`共${actualEpisodes}集`}
+                    </span>
+                  </div>
+                )}
+              </div>
             );
           })()}
 
@@ -961,26 +958,7 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
             </div>
           )}
 
-          {/* 已完结徽章 - 美化版，放在底部左侧 */}
-          {remarks && isSeriesCompleted(remarks) && (
-            <div
-              className="absolute bottom-2 left-2 bg-gradient-to-br from-blue-500/95 via-indigo-500/95 to-purple-600/95 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg ring-2 ring-white/30 transition-all duration-300 ease-out group-hover:scale-105 group-hover:shadow-blue-500/60 group-hover:ring-blue-300/50"
-              style={{
-                WebkitUserSelect: 'none',
-                userSelect: 'none',
-                WebkitTouchCallout: 'none',
-              } as React.CSSProperties}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                return false;
-              }}
-            >
-              <span className="flex items-center gap-1">
-                <span className="text-[10px]">✓</span>
-                已完结
-              </span>
-            </div>
-          )}
+          {/* 已完结徽章已合并到底部左侧容器（见上） */}
 
           {/* 即将上映徽章 - 美化版，放在底部左侧 */}
           {remarks && remarks.includes('天后上映') && (
@@ -1036,7 +1014,7 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(function VideoCard
               target='_blank'
               rel='noopener noreferrer'
               onClick={(e) => e.stopPropagation()}
-              className='absolute top-2 left-2 opacity-0 -translate-x-2 transition-all duration-300 ease-in-out delay-100 sm:group-hover:opacity-100 sm:group-hover:translate-x-0'
+              className='absolute bottom-2 right-2 opacity-0 translate-y-2 transition-all duration-300 ease-in-out delay-100 sm:group-hover:opacity-100 sm:group-hover:translate-y-0'
               style={{
                 WebkitUserSelect: 'none',
                 userSelect: 'none',

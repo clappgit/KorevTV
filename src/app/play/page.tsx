@@ -4179,15 +4179,11 @@ function PlayPageClient() {
           </div>
 
           <div
-            className={`grid gap-4 lg:h-[500px] xl:h-[650px] 2xl:h-[750px] transition-all duration-300 ease-in-out ${isEpisodeSelectorCollapsed || theaterMode
-              ? 'grid-cols-1'
-              : 'grid-cols-1 md:grid-cols-4'
-              }`}
+            className={`grid gap-4 lg:h-[500px] xl:h-[650px] 2xl:h-[750px] transition-all duration-300 ease-in-out grid-cols-1 md:grid-cols-4`}
           >
             {/* 播放器 */}
             <div
-              className={`h-full transition-all duration-300 ease-in-out rounded-xl border border-white/0 dark:border-white/30 ${isEpisodeSelectorCollapsed || theaterMode ? 'col-span-1' : 'md:col-span-3'
-                }`}
+              className={`h-full transition-all duration-300 ease-in-out rounded-xl border border-white/0 dark:border-white/30 col-span-1 ${theaterMode || isEpisodeSelectorCollapsed ? 'md:col-span-4' : 'md:col-span-3'}`}
             >
               <div className='relative w-full h-[300px] lg:h-full'>
                 <div
@@ -4204,8 +4200,8 @@ function PlayPageClient() {
                   ?
                 </button>
 
-                {/* 清晰度/码率/网速徽章 - 播放器左上角下方 */}
-                <div className='absolute left-4 top-14 z-10 flex flex-wrap items-center gap-2'>
+                {/* 清晰度/码率/网速徽章 - 放置在 ? 按钮右侧 */}
+                <div className='absolute left-14 top-4 z-10 flex flex-wrap items-center gap-2'>
                   {qualityInfo?.height && (
                     <span className='px-2 py-1 text-xs rounded-full bg-black/40 text-white border border-white/30 backdrop-blur-sm'>
                       {qualityInfo.height}p
@@ -4330,10 +4326,10 @@ function PlayPageClient() {
               </div>
             </div>
 
-            {/* 选集和换源 - 在移动端始终显示，在 lg 及以上可折叠 */}
+            {/* 选集和换源 - 移动端显示；桌面影院模式或折叠时隐藏 */}
             <div
-              className={`h-[300px] lg:h-full md:overflow-hidden transition-all duration-300 ease-in-out ${isEpisodeSelectorCollapsed
-                ? 'md:col-span-1 lg:hidden lg:opacity-0 lg:scale-95'
+              className={`h-[300px] lg:h-full md:overflow-hidden transition-all duration-300 ease-in-out ${theaterMode || isEpisodeSelectorCollapsed
+                ? 'md:hidden'
                 : 'md:col-span-1 lg:opacity-100 lg:scale-100'
                 }`}
             >

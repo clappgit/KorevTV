@@ -22,6 +22,12 @@ const CapsuleSwitch: React.FC<CapsuleSwitchProps> = ({
     width: number;
   }>({ left: 0, width: 0 });
 
+  // 触摸滑动状态（仅用于移动端横向切换）
+  const touchStartXRef = useRef<number | null>(null);
+  const touchLastXRef = useRef<number | null>(null);
+  const touchTriggeredRef = useRef<boolean>(false);
+  const SWIPE_THRESHOLD = 30; // 触发切换的最小位移（像素）
+
   // 兼容无传入 options 的情况，避免运行时异常
   const safeOptions = Array.isArray(options) ? options : [];
   const activeIndex = safeOptions.findIndex((opt) => opt.value === active);
@@ -61,12 +67,66 @@ const CapsuleSwitch: React.FC<CapsuleSwitchProps> = ({
     return () => clearTimeout(timeoutId);
   }, [activeIndex]);
 
+  // 触摸事件处理：左右滑动切换激活项
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      touchStartXRef.current = t.clientX;
+      touchLastXRef.current = t.clientX;
+      touchTriggeredRef.current = false;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      const startX = touchStartXRef.current;
+      if (startX == null) return;
+      const dx = t.clientX - startX;
+      touchLastXRef.current = t.clientX;
+      // 只在一次滑动中触发一次切换
+      if (!touchTriggeredRef.current && Math.abs(dx) > SWIPE_THRESHOLD) {
+        touchTriggeredRef.current = true;
+        const nextIndex = (() => {
+          if (dx < 0) {
+            // 左滑：下一个
+            return Math.min(activeIndex + 1, safeOptions.length - 1);
+          } else {
+            // 右滑：上一个
+            return Math.max(activeIndex - 1, 0);
+          }
+        })();
+        if (nextIndex !== activeIndex && safeOptions[nextIndex]) {
+          onChange(safeOptions[nextIndex].value);
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchStartXRef.current = null;
+      touchLastXRef.current = null;
+      touchTriggeredRef.current = false;
+    };
+
+    el.addEventListener('touchstart', handleTouchStart, { passive: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: true });
+    el.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [activeIndex, safeOptions, onChange]);
+
   return (
     <div
       ref={containerRef}
       className={`relative inline-flex bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded-full p-1 shadow-lg ${
         className || ''
       }`}
+      style={{ touchAction: 'pan-x' }}
     >
       {/* 滑动的渐变背景指示器 */}
       {indicatorStyle.width > 0 && (

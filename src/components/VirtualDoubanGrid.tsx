@@ -161,7 +161,7 @@ export const VirtualDoubanGrid: React.FC<VirtualDoubanGridProps> = ({
           douban_id={Number(item.id)}
           rate={item.rate}
           year={item.year}
-          type={cellType === 'movie' ? 'movie' : ''} // 电影类型严格控制，tv 不控
+          type={cellType} // 传递实际类型，确保综艺/动漫/电视剧徽章显示
           isBangumi={cellIsBangumi}
         />
       </div>

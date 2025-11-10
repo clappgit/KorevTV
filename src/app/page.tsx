@@ -51,6 +51,34 @@ function HomeClient() {
   const { announcement } = useSite();
   const [username, setUsername] = useState<string>('');
   const [rotationSeed, setRotationSeed] = useState<number>(() => Math.floor(Math.random() * 1000));
+  // 横幅轮换与缓存间隔（分钟）——如需调整，只改这里即可
+  const ROTATION_TTL_MINUTES = 60; // 改为 1 小时
+
+  // 轮换种子持久化：仅每30分钟更新一次，避免每次刷新都变更横幅
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const ttlMs = ROTATION_TTL_MINUTES * 60 * 1000;
+      const savedSeedStr = localStorage.getItem('home_rotation_seed');
+      const savedTsStr = localStorage.getItem('home_rotation_seed_ts');
+      const savedTs = savedTsStr ? parseInt(savedTsStr, 10) : 0;
+      const now = Date.now();
+
+      if (savedSeedStr && savedTs && now - savedTs < ttlMs) {
+        const seed = Number(savedSeedStr);
+        if (!Number.isNaN(seed)) {
+          setRotationSeed(seed);
+        }
+      } else {
+        const newSeed = Math.floor(Math.random() * 1000000);
+        setRotationSeed(newSeed);
+        localStorage.setItem('home_rotation_seed', String(newSeed));
+        localStorage.setItem('home_rotation_seed_ts', String(now));
+      }
+    } catch {
+      // 忽略本地存储错误
+    }
+  }, []);
 
   const [showAnnouncement, setShowAnnouncement] = useState(false);
   const [showAIRecommendModal, setShowAIRecommendModal] = useState(false);
@@ -404,7 +432,7 @@ function HomeClient() {
           }, []);
 
           console.log('📅 去重后的即将上映数据:', uniqueUpcoming.length, '条');
-          setUpcomingReleases(uniqueUpcoming.slice(0, 10)); // 最多显示10个
+          setUpcomingReleases(uniqueUpcoming.slice(0, 20)); // 首页显示更多：最多20个
         } else {
           console.warn('获取即将上映数据失败:', upcomingReleasesData.status === 'rejected' ? upcomingReleasesData.reason : '数据格式错误');
           setUpcomingReleases([]);
@@ -424,12 +452,19 @@ function HomeClient() {
 
   useEffect(() => {
     // 每30分钟自动刷新一次（页面可见时）
-    const refreshMs = 30 * 60 * 1000;
+    const refreshMs = ROTATION_TTL_MINUTES * 60 * 1000;
     const timer = setInterval(() => {
       try {
         if (typeof document === 'undefined' || document.visibilityState !== 'visible') return;
-        // 轮换种子递增，使展示条目切换
-        setRotationSeed((prev) => (prev + 1) % 1000000);
+        // 轮换种子递增，使展示条目切换，并持久化到本地存储
+        setRotationSeed((prev) => {
+          const next = (prev + 1) % 1000000;
+          try {
+            localStorage.setItem('home_rotation_seed', String(next));
+            localStorage.setItem('home_rotation_seed_ts', String(Date.now()));
+          } catch {}
+          return next;
+        });
         fetchRecommendData();
       } catch (e) {
         // 忽略定时刷新错误，避免影响页面
@@ -902,6 +937,7 @@ function HomeClient() {
                           douban_id={Number(show.id)}
                           rate={show.rate}
                           year={show.year}
+                          type='tv'
                         />
                       </div>
                     ))}
@@ -1005,6 +1041,7 @@ function HomeClient() {
                           douban_id={Number(show.id)}
                           rate={show.rate}
                           year={show.year}
+                          type='variety'
                         />
                       </div>
                     ))}
