@@ -5290,13 +5290,20 @@ const LiveSourceConfig = ({
             />
             <input
               type='text'
-              placeholder='M3U 地址'
+              placeholder='源地址（支持 M3U/JSON/TXT/PHP 等返回）'
               value={newLiveSource.url}
               onChange={(e) =>
                 setNewLiveSource((prev) => ({ ...prev, url: e.target.value }))
               }
               className='px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
             />
+            <div className='sm:col-span-2 text-xs text-gray-600 dark:text-gray-400'>
+              支持的格式：
+              <span className='font-medium'>M3U</span>（含 <code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>#EXTM3U</code>）、
+              <span className='font-medium'>JSON</span>（对象或数组，字段 <code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>channels/name/url/logo/group/tvgId</code>）、
+              <span className='font-medium'>TXT</span>（<code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>名称,http://...</code> 或 <code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>分组#名称#http://...</code>）。
+              也可填写 <span className='font-medium'>PHP/脚本地址</span>，只要返回上述任一格式即可。
+            </div>
             <input
               type='text'
               placeholder='节目单地址（选填）'
@@ -5370,7 +5377,7 @@ const LiveSourceConfig = ({
             </div>
             <div>
               <label className='block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                M3U 地址
+                源地址（支持 M3U/JSON/TXT/PHP 等返回）
               </label>
               <input
                 type='text'
@@ -5380,6 +5387,9 @@ const LiveSourceConfig = ({
                 }
                 className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
               />
+              <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
+                支持 M3U（带 <code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>#EXTM3U</code>）、JSON（对象或数组，含 <code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>name/url</code> 字段）、TXT（<code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>名称,http://...</code> 或 <code className='px-1 bg-gray-200 dark:bg-gray-700 rounded'>分组#名称#http://...</code>）。PHP 等脚本地址只需返回上述格式即可。
+              </p>
             </div>
             <div>
               <label className='block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1'>
