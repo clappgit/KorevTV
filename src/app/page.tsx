@@ -900,6 +900,7 @@ function HomeClient() {
                         <VideoCard
                           from='douban'
                           title={movie.title}
+                          query={movie.title}
                           poster={movie.poster}
                           douban_id={Number(movie.id)}
                           rate={movie.rate}
@@ -938,6 +939,7 @@ function HomeClient() {
                         <VideoCard
                           from='douban'
                           title={show.title}
+                          query={show.title}
                           poster={show.poster}
                           douban_id={Number(show.id)}
                           rate={show.rate}
@@ -993,22 +995,23 @@ function HomeClient() {
                           key={`${anime.id}-${index}`}
                           className='min-w-[96px] w-24 sm:min-w-[180px] sm:w-44'
                         >
-                          <VideoCard
-                            from='douban'
-                            title={anime.name_cn || anime.name}
-                            poster={
-                              anime.images?.large ||
-                              anime.images?.common ||
-                              anime.images?.medium ||
-                              anime.images?.small ||
-                              anime.images?.grid ||
-                              '/placeholder-poster.jpg'
-                            }
-                            douban_id={anime.id}
-                            rate={anime.rating?.score?.toFixed(1) || ''}
-                            year={anime.air_date?.split('-')?.[0] || ''}
-                            isBangumi={true}
-                          />
+                        <VideoCard
+                          from='douban'
+                          title={anime.name_cn || anime.name}
+                          query={anime.name_cn || anime.name}
+                          poster={
+                            anime.images?.large ||
+                            anime.images?.common ||
+                            anime.images?.medium ||
+                            anime.images?.small ||
+                            anime.images?.grid ||
+                            '/placeholder-poster.jpg'
+                          }
+                          douban_id={anime.id}
+                          rate={anime.rating?.score?.toFixed(1) || ''}
+                          year={anime.air_date?.split('-')?.[0] || ''}
+                          isBangumi={true}
+                        />
                         </div>
                       ));
                     })()}
@@ -1042,6 +1045,7 @@ function HomeClient() {
                         <VideoCard
                           from='douban'
                           title={show.title}
+                          query={show.title}
                           poster={show.poster}
                           douban_id={Number(show.id)}
                           rate={show.rate}
