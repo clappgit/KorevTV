@@ -111,6 +111,9 @@ export default function NetDiskSearchResults({
   const [expandedTitles, setExpandedTitles] = useState<{
     [key: string]: boolean;
   }>({});
+  const [onlyWithPassword, setOnlyWithPassword] = useState(false);
+  const [recentOnly, setRecentOnly] = useState(false);
+  const [withImagesOnly, setWithImagesOnly] = useState(false);
 
   const togglePasswordVisibility = (key: string) => {
     setVisiblePasswords((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -147,15 +150,37 @@ export default function NetDiskSearchResults({
     return m ? m[1] : '-';
   };
 
+  // 链接过滤器
+  const applyLinkFilter = (links: NetDiskLink[]) => {
+    const safe = Array.isArray(links) ? links : [];
+    return safe.filter((link) => {
+      if (onlyWithPassword && !link.password) return false;
+      if (withImagesOnly && !(link.images && link.images.length > 0)) return false;
+      if (recentOnly) {
+        const dt = link.datetime ? new Date(link.datetime).getTime() : 0;
+        const now = Date.now();
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        if (!dt || now - dt > sevenDays) return false;
+      }
+      return true;
+    });
+  };
+
   // 筛选结果
-  const filteredResults =
-    results && filterMode === 'selected' && selectedFilter.length > 0
-      ? Object.fromEntries(
-          Object.entries(results).filter(([type]) =>
-            selectedFilter.includes(type)
+  const filteredResults = (() => {
+    if (!results) return results;
+    const base =
+      filterMode === 'selected' && selectedFilter.length > 0
+        ? Object.fromEntries(
+            Object.entries(results).filter(([type]) =>
+              selectedFilter.includes(type)
+            )
           )
-        )
-      : results;
+        : results;
+    return Object.fromEntries(
+      Object.entries(base).map(([type, links]) => [type, applyLinkFilter(links)])
+    );
+  })();
 
   // 快速跳转到指定网盘类型
   const scrollToCloudType = (type: string) => {
@@ -173,11 +198,11 @@ export default function NetDiskSearchResults({
   };
 
   // 获取有结果的网盘类型统计
-  const availableTypes = results
+  const availableTypes = filteredResults
     ? Object.entries(results)
         .map(([type, links]) => ({
           type,
-          count: links.length,
+          count: Array.isArray(links) ? links.length : 0,
           info:
             CLOUD_TYPES[type as keyof typeof CLOUD_TYPES] || CLOUD_TYPES.others,
         }))
@@ -536,7 +561,7 @@ export default function NetDiskSearchResults({
             ) : (
               <>
                 共找到 <strong>{total}</strong> 个网盘资源，覆盖{' '}
-                <strong>{Object.keys(results).length}</strong> 种网盘类型
+                <strong>{Object.keys(filteredResults || {}).length}</strong> 种网盘类型
               </>
             )}
           </span>

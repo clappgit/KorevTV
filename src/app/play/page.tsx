@@ -5756,21 +5756,35 @@ function PlayPageClient() {
               {/* 剧情简介 */}
               {(detail?.desc || bangumiDetails?.summary) && (
                 <div className='mt-0 text-base leading-relaxed opacity-90 flex-1 min-h-0'>
+                  <div className='text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1'>剧情简介</div>
                   <div
-                    className={`${
-                      showFullDesc ? '' : 'max-h-40 overflow-hidden'
-                    } pr-2`}
+                    className={`relative ${showFullDesc ? '' : 'max-h-40 overflow-hidden'} pr-2`}
                     style={{ whiteSpace: 'pre-line' }}
                   >
                     {bangumiDetails?.summary || detail?.desc}
+                    {!showFullDesc && (
+                      <div className='pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white/80 to-transparent dark:from-black/60'></div>
+                    )}
                   </div>
-                  <div className='mt-2'>
+                  <div className='mt-2 flex items-center gap-2'>
                     <button
                       onClick={() => setShowFullDesc((v) => !v)}
                       className='px-3 py-1 rounded-full text-xs border border-white/30 bg-black/10 text-gray-800 dark:bg-white/10 dark:text-gray-200 backdrop-blur-sm'
+                      aria-label={showFullDesc ? '收起剧情简介' : '展开剧情简介'}
                     >
                       {showFullDesc ? '收起' : '展开'}
                     </button>
+                    {videoDoubanId !== 0 && (
+                      <a
+                        href={bangumiDetails ? `https://bgm.tv/subject/${videoDoubanId}` : `https://movie.douban.com/subject/${videoDoubanId}`}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='px-2.5 py-1 rounded-full text-xs border border-white/30 bg-black/10 text-gray-800 dark:bg-white/10 dark:text-gray-200 backdrop-blur-sm'
+                        aria-label='打开来源页面'
+                      >
+                        {bangumiDetails ? 'Bangumi' : '豆瓣'}
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
