@@ -5423,7 +5423,6 @@ function PlayPageClient() {
                       }}
                       className='group relative flex-shrink-0 transition-all duration-300 hover:scale-105'
                     >
-                      <span className='card-sweep rounded-full'></span>
                       <div className='relative flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300'>
                         📁
                         {netdiskLoading ? (
