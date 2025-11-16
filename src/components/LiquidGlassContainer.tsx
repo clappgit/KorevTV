@@ -13,6 +13,7 @@ interface LiquidGlassContainerProps {
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   animated?: boolean; // 是否启用液态玻璃动效
   animatedMode?: 'always' | 'hover' | 'inview'; // 动效触发模式
+  tint?: 'blue' | 'neutral' | 'pink';
 }
 
 export default function LiquidGlassContainer({
@@ -24,6 +25,7 @@ export default function LiquidGlassContainer({
   shadow = 'lg',
   animated = true,
   animatedMode = 'inview',
+  tint = 'blue',
 }: LiquidGlassContainerProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(true);
@@ -80,12 +82,13 @@ export default function LiquidGlassContainer({
   };
 
   const classes = clsx(
-    'relative overflow-hidden',
+    'relative overflow-hidden lgx-glass',
     roundedClass,
     intensityClasses,
     borderClasses,
     shadowMap[shadow],
-    className
+    className,
+    tint === 'blue' ? 'lgx-tint-blue' : tint === 'pink' ? 'lgx-tint-pink' : 'lgx-tint-neutral'
   );
 
   const overlayIntensityClass =
@@ -108,6 +111,8 @@ export default function LiquidGlassContainer({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      <span aria-hidden className='lgx-specular' />
+      <span aria-hidden className='lgx-edge' />
       {shouldAnimate && (
         <>
           <span
