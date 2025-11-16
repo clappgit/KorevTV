@@ -371,7 +371,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
               <div className='absolute inset-0 bg-gray-100/50 dark:bg-gray-800/50 group-hover:bg-gray-100 dark:group-hover:bg-gray-800/70 transition-colors duration-300 -z-10'></div>
             )}
             {/* 悬浮光效 */}
-            <span className='scan-sweep -z-10'></span>
+            <span className='card-sweep -z-10'></span>
             <span className='relative z-10 font-bold'>选集</span>
           </div>
         )}
@@ -393,7 +393,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
             <div className='absolute inset-0 bg-gray-100/50 dark:bg-gray-800/50 group-hover:bg-gray-100 dark:group-hover:bg-gray-800/70 transition-colors duration-300 -z-10'></div>
           )}
           {/* 悬浮光效 */}
-          <span className='scan-sweep -z-10'></span>
+          <span className='card-sweep -z-10'></span>
           <span className='relative z-10 font-bold'>换源</span>
         </div>
       </div>
@@ -485,7 +485,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
                   )}
                   {/* 悬浮态闪光效果 */}
                   {!isActive && (
-                    <span className='scan-sweep'></span>
+                    <span className='card-sweep'></span>
                   )}
                   <span className='relative z-10'>
                     {(() => {
@@ -590,7 +590,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
 
                         {/* 悬浮光效 */}
                         {!isCurrentSource && (
-                          <span className='scan-sweep pointer-events-none'></span>
+                          <span className='card-sweep pointer-events-none'></span>
                         )}
 
                         {/* 封面 */}

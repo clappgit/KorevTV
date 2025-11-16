@@ -502,32 +502,30 @@ html.dark .lgx-tint-pink {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 8px rgba(0, 0, 0, 0.12);
   pointer-events: none;
 }
-.scan-sweep {
+.card-sweep {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  /* 更接近卡片的细窄扫光 */
   background: linear-gradient(
     110deg,
-    transparent 48%,
-    rgba(255, 255, 255, 0.12) 50%,
-    rgba(255, 255, 255, 0.35) 51%,
-    rgba(255, 255, 255, 0.12) 52%,
-    transparent 54%
+    transparent 49%,
+    rgba(255, 255, 255, 0.15) 49.7%,
+    rgba(255, 255, 255, 0.38) 50%,
+    rgba(255, 255, 255, 0.15) 50.3%,
+    transparent 51%
   );
-  background-size: 180% 100%;
-  filter: blur(2px);
+  background-size: 200% 100%;
   opacity: 0;
-  transition: opacity 180ms ease;
+  transition: opacity 160ms ease;
 }
-.group:hover .scan-sweep,
-.scan-sweep.hover {
-  opacity: 0.25;
-  animation: scan-sweep-move 1.8s ease-in-out infinite;
+.group:hover .card-sweep,
+.card-sweep.hover {
+  opacity: 0.22;
+  animation: card-sweep-move 1.6s ease-in-out infinite;
 }
-@keyframes scan-sweep-move {
-  0% { background-position: -110% 0; }
-  50% { background-position: 110% 0; }
-  100% { background-position: -110% 0; }
+@keyframes card-sweep-move {
+  0% { background-position: -100% 0; }
+  50% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
