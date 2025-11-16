@@ -5794,7 +5794,7 @@ function PlayPageClient() {
 
               {/* 网盘资源区域 */}
               <div id='netdisk-section' className='mt-6'>
-                <div className='border-t border-gray-200 dark:border-gray-700 pt-6'>
+                <LiquidGlassContainer className='pt-6 px-4 pb-4' roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
                   <div className='mb-4'>
                     <h3 className='text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2'>
                       📁 网盘资源
@@ -5829,7 +5829,7 @@ function PlayPageClient() {
                     error={netdiskError}
                     total={netdiskTotal}
                   />
-                </div>
+                </LiquidGlassContainer>
               </div>
             </LiquidGlassContainer>
           </div>
@@ -5837,6 +5837,7 @@ function PlayPageClient() {
           {/* 封面展示 */}
           <div className='hidden md:block md:col-span-1 md:order-first'>
             <div className='pl-0 py-4 pr-6'>
+              <LiquidGlassContainer className='p-2' roundedClass='rounded-xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
               <div className='group relative bg-gray-300 dark:bg-gray-700 aspect-[2/3] flex items-center justify-center rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]'>
                 {videoCover || bangumiDetails?.images?.large ? (
                   <>
@@ -5910,6 +5911,7 @@ function PlayPageClient() {
                   </span>
                 )}
               </div>
+              </LiquidGlassContainer>
             </div>
           </div>
         </div>
