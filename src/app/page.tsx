@@ -833,6 +833,7 @@ function HomeClient() {
               })()}
               {!loading && upcomingReleases.length > 0 && (
                 <section className='mb-8'>
+                  <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
                   <div className='mb-4 flex items-center justify-between'>
                     <SectionTitle title="即将上映" icon={Calendar} iconColor="text-orange-500" />
                     <Link
@@ -873,6 +874,7 @@ function HomeClient() {
                       );
                     })}
                   </ScrollableRow>
+                  </LiquidGlassContainer>
                 </section>
               )}
 
