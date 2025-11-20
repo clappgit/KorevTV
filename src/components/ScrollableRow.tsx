@@ -138,15 +138,15 @@ function ScrollableRow({
             zIndex: 2147483647,
           }}
         >
-          <div
-            className='absolute inset-0 flex items-center justify-center'
-            style={{
-              top: '40%',
-              bottom: '60%',
-              left: '0.5rem',
-              pointerEvents: 'auto',
-            }}
-          >
+        <div
+          className='absolute inset-0 flex items-center justify-center'
+          style={{
+            top: '50%',
+            left: '0.5rem',
+            pointerEvents: 'auto',
+            transform: 'translateY(-50%)',
+          }}
+        >
             <button
               onClick={handleScrollLeftClick}
               className='w-12 h-12 rounded-full transition-transform hover:scale-105'
@@ -176,15 +176,15 @@ function ScrollableRow({
             zIndex: 2147483647,
           }}
         >
-          <div
-            className='absolute inset-0 flex items-center justify-center'
-            style={{
-              top: '40%',
-              bottom: '60%',
-              right: '0.5rem',
-              pointerEvents: 'auto',
-            }}
-          >
+        <div
+          className='absolute inset-0 flex items-center justify-center'
+          style={{
+            top: '50%',
+            right: '0.5rem',
+            pointerEvents: 'auto',
+            transform: 'translateY(-50%)',
+          }}
+        >
             <button
               onClick={handleScrollRightClick}
               className='w-12 h-12 rounded-full transition-transform hover:scale-105'
