@@ -81,7 +81,7 @@ export const VersionPanel: React.FC<VersionPanelProps> = ({
   const fetchRemoteChangelog = async () => {
     try {
       const response = await fetch(
-        'https://raw.githubusercontent.com/SzeMeng76/LunaTV/refs/heads/main/CHANGELOG'
+        'https://raw.githubusercontent.com/Korean032/KorevTV/refs/heads/main/CHANGELOG'
       );
       if (response.ok) {
         const content = await response.text();
@@ -187,12 +187,13 @@ export const VersionPanel: React.FC<VersionPanelProps> = ({
     return (
       <div
         key={entry.version}
-        className={`p-4 rounded-lg border ${isCurrentVersion
-          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-          : isUpdate
+        className={`p-4 rounded-lg border ${
+          isCurrentVersion
+            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+            : isUpdate
             ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
             : 'bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
-          }`}
+        }`}
       >
         {/* 版本标题 */}
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3'>
@@ -444,10 +445,11 @@ export const VersionPanel: React.FC<VersionPanelProps> = ({
                       .map((entry, index) => (
                         <div
                           key={index}
-                          className={`p-4 rounded-lg border ${entry.version === latestVersion
-                            ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-                            : 'bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
-                            }`}
+                          className={`p-4 rounded-lg border ${
+                            entry.version === latestVersion
+                              ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                              : 'bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
+                          }`}
                         >
                           <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3'>
                             <div className='flex flex-wrap items-center gap-2'>
